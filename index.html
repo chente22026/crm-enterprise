@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CRM Enterprise — Inicio</title>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; margin: 0; background:#f7fafc; color:#0f172a; }
+    .container { max-width:900px; margin:48px auto; background:white; padding:28px; border-radius:12px; box-shadow:0 6px 18px rgba(2,6,23,0.08); }
+    h1 { margin:0 0 8px; font-size:28px; }
+    p.lead { margin:0 0 18px; color:#475569; }
+    ul { margin:0 0 18px 20px; color:#334155; }
+    code { background:#eef2ff; padding:2px 6px; border-radius:6px; font-size:90%; }
+    footer { margin-top:24px; color:#94a3b8; font-size:13px; }
+    .kbd { background:#111827; color:white; padding:6px 10px; border-radius:6px; font-family:monospace; display:inline-block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CRM Enterprise</h1>
+    <p class="lead">Scaffold inicial del proyecto CRM Enterprise — monorepo (frontend, backend, infra).</p>
+
+    <h3>Estado</h3>
+    <ul>
+      <li>Archivo de inicio: <code>index.html</code> (este archivo)</li>
+      <li>Objetivo: primer commit para permitir creación de ramas y PRs.</li>
+    </ul>
+
+    <h3>Próximos pasos recomendados</h3>
+    <ol>
+      <li>Hacer commit y push de este archivo a la rama <code>main</code>.</li>
+      <li>Crear la rama <code>scaffold/initial</code> y pushear los archivos del scaffold (o ejecutar el script local que te pasé).</li>
+      <li>Abrir PR: <code>scaffold/initial → main</code>.</li>
+    </ol>
+
+    <h3>Comandos útiles (en tu terminal)</h3>
+    <pre>
+# Crear el index.html con contenido arriba, luego:
+git add index.html
+git commit -m "chore: add landing index.html (initial commit)"
+git branch -M main
+
+# Si aún no añadiste el remoto:
+git remote add origin https://github.com/chente22026/crm-enterprise.git
+# o con SSH:
+# git remote add origin git@github.com:chente22026/crm-enterprise.git
+
+git push -u origin main
+
+# Crear y pushear la rama scaffold/initial
+git checkout -b scaffold/initial
+git push -u origin scaffold/initial
+
+# (Opcional, si tienes gh CLI y estás autenticado)
+gh pr create --title "Initial scaffold" --body "Initial scaffold branch" --base main --head scaffold/initial
+    </pre>
+
+    <footer>
+      Si quieres, después de pushear la rama <span class="kbd">scaffold/initial</span> me pasas el enlace al PR y yo reviso el scaffold, creo issues/epics y añado sugerencias.
+    </footer>
+  </div>
+</body>
+</html>
