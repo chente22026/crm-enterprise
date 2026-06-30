@@ -1,0 +1,140 @@
+// backend/prisma/seed.js
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+async function upsertEmployee(email, data) {
+  return prisma.employee.upsert({
+    where: { email },
+    update: data,
+    create: { email, ...data }
+  });
+}
+
+async function upsertClient(email, data) {
+  if (!email) {
+    // clients may not have email; create unique by name+timestamp fallback
+    return prisma.client.create({ data });
+  }
+  return prisma.client.upsert({
+    where: { email },
+    update: data,
+    create: { email, ...data }
+  });
+}
+
+async function upsertInvoice(reference, data) {
+  return prisma.invoice.upsert({
+    where: { reference },
+    update: data,
+    create: { reference, ...data }
+  });
+}
+
+async function safeCreateCompanyIfNone() {
+  const c = await prisma.company.findFirst();
+  if (c) return c;
+  return prisma.company.create({
+    data: { name: 'ACME Corp', website: 'https://acme.example' }
+  });
+}
+
+async function main() {
+  console.log('Seed: iniciando...');
+  try {
+    // Ensure at least one company
+    const company = await safeCreateCompanyIfNone();
+    console.log('Company:', company.id);
+
+    // Employees (HR)
+    const emp1 = await upsertEmployee('ana@example.com', {
+      firstName: 'Ana',
+      lastName: 'García',
+      position: 'CTO',
+      department: 'Engineering',
+      salary: 90000,
+      active: true
+    });
+    const emp2 = await upsertEmployee('luis@example.com', {
+      firstName: 'Luis',
+      lastName: 'Rodríguez',
+      position: 'Sales Manager',
+      department: 'Sales',
+      salary: 60000,
+      active: true
+    });
+    console.log('Employees seeded:', emp1.id, emp2.id);
+
+    // Clients
+    const clientA = await upsertClient('clienta@example.com', {
+      name: 'Client A',
+      phone: '+34123456789',
+      address: 'Calle Falsa 123',
+      companyId: company.id
+    });
+    const clientB = await upsertClient('clientb@example.com', {
+      name: 'Client B',
+      phone: '+34123456780',
+      address: 'Av. Principal 45',
+      companyId: company.id
+    });
+    console.log('Clients seeded:', clientA.id, clientB.id);
+
+    // Contacts
+    const contact = await prisma.contact.findFirst({ where: { email: 'juanp@example.com' } });
+    if (!contact) {
+      await prisma.contact.create({
+        data: {
+          firstName: 'Juan',
+          lastName: 'Pérez',
+          email: 'juanp@example.com',
+          phone: '+34123459000',
+          companyId: company.id
+        }
+      });
+      console.log('Contact creado: juanp@example.com');
+    }
+
+    // Deals
+    const existingDeal = await prisma.deal.findFirst({ where: { title: 'Lead A' } });
+    if (!existingDeal) {
+      await prisma.deal.create({
+        data: {
+          title: 'Lead A',
+          value: 1200,
+          currency: 'USD',
+          stage: 'new',
+          ownerId: emp2.id
+        }
+      });
+      console.log('Deal creado: Lead A');
+    }
+
+    // Invoices (fixed references to be idempotent)
+    const inv1 = await upsertInvoice('INV-0001', {
+      clientId: clientA.id,
+      amount: 1200,
+      currency: 'USD',
+      status: 'sent',
+      dueDate: new Date(Date.now() + 7 * 24 * 3600 * 1000), // 7 días
+      description: 'Consultoría inicial'
+    });
+    const inv2 = await upsertInvoice('INV-0002', {
+      clientId: clientB.id,
+      amount: 400,
+      currency: 'USD',
+      status: 'draft',
+      dueDate: new Date(Date.now() + 14 * 24 * 3600 * 1000),
+      description: 'Servicio mensual'
+    });
+    console.log('Invoices seeded:', inv1.reference, inv2.reference);
+
+    console.log('Seed completado.');
+  } catch (err) {
+    console.error('Seed error:', err);
+    process.exitCode = 1;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+main();
